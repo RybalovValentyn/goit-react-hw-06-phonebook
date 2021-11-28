@@ -1,40 +1,56 @@
-import React, { Component } from "react";
 import s from './phonebook.module.css'
 import {connect} from 'react-redux'
 import * as action from '../../componets/Redux/action'
+import { useState} from 'react';
 
+function  Phonebook ({contact, onSubmit}) {
 
-class Phonebook extends Component{
+const [name, setname] = useState('');
+const [number, setnumber] = useState('');
 
-state={
-    name: '',
-    phone: '',
-    number: '',
-}
-handleCange = (event) => {
-    const {name, value } = event.currentTarget   
-  this.setState({ [name]: value
-       
-  }) };
+const handleChange = event => {
+  const { name, value } = event.target;
+console.log(name, value);
+  switch (name) {
+    case 'name':
+      setname(value);
+      break;
 
-  handleSubmit = (event) =>{
-    event.preventDefault();
-    this.setState({ contacts: {name:this.state.name, number:this.state.number}})
-  
-    this.props.onSubmit(this.state.name, this.state.number)//передали данные в АРР!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   
-    this.resetForm();
-   };
+    case 'number':
+      setnumber(value);
+      break;
 
-resetForm = () => {
-this.setState({name: '', number:''}) //передали в стейт пустые данные
+    default:
+      return;
+  }
 };
 
 
-render(){
-    return(
+
+ const handleSubmit = (event) =>{
+    event.preventDefault();
+
+      !filteredContacts(name, number)
+   ? onSubmit(name, number)
+    : alert(`${name} is already in contacts`);
+    
+  
+   resetForm();
+   };
+
+const  filteredContacts = (name,number ) => {     
+    return contact.find(contact => contact.name === name)    
+  }
+
+
+const resetForm = () => {
+  setname('')
+  setnumber('')
+};
+
+return(
         <form className={s.container}
-         onSubmit={this.handleSubmit}
+         onSubmit={handleSubmit}
         >
 
         <label className={s.labelInpt} >name
@@ -44,8 +60,8 @@ render(){
   pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
   title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
   required
-  value={this.state.name}
-  onChange={this.handleCange }
+  value={name}
+  onChange={handleChange}
 /></label>
 
 <label className={s.labelInpt}> Number
@@ -55,8 +71,8 @@ render(){
   pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
   title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
   required
-  value={this.state.number}
-  onChange={this.handleCange }
+  value={number}
+  onChange={handleChange }
 /></label>
 
 <button className={s.submitBtn} type='submit' >Add contact</button>
@@ -64,14 +80,17 @@ render(){
     )
 }
 
-}
 
-   const mapDispatchToProps = dispatch => {                      //отправляем методы обработки 
-      return {
-        onSubmit: (name, number)=> dispatch(action.addContact(name, number)),       //привязали действие
-          // onDecrement: (step) => dispatch(action.decrement(step))
+
+ const mapDispatchToProps = dispatch => {                      //отправляем методы обработки 
+    return {
+    onSubmit: (name, number)=> dispatch(action.addContact(name, number)),       //привязали действие
       }
   }
-export default connect(null,mapDispatchToProps)(Phonebook)
+  const mapStateToProps = state =>{                   //фильтрация перед рендером, раньше передавали пропами сейчас фильтруэм прямо при получениии из стейта
+    const contact = state.contacts;
+     return contact
+}
 
-// export default Phonebook
+export default connect(mapStateToProps,mapDispatchToProps)(Phonebook)
+
